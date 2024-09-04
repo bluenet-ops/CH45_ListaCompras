@@ -1,4 +1,5 @@
 const btnAgregar = document.getElementById("btnAgregar");
+const btnClear = document.getElementById("btnClear");
 const txtNombre = document.getElementById("Name");
 const txtNumero = document.getElementById("Number");
 const alertValidaciones = document.getElementById("alertValidaciones");
@@ -16,6 +17,8 @@ let precio = 0;
 let costoTotal = 0;
 let totalEnProductos = 0;
 
+let datos = new Array();
+
 function validarCantidad(){
     if (txtNumero.value.length == 0) {
         return false; // Si regresa falso mandará alerta en !validarCantidad
@@ -27,7 +30,7 @@ function validarCantidad(){
 
     if (Number(txtNumero.value)<=0) {
         return false;
-    } // < = 0
+    } // <=0
 
     return true;
 } // validarCantidad()
@@ -70,6 +73,15 @@ btnAgregar.addEventListener("click", function(event){
             <td>${txtNumero.value}</td>
             <td>${precio}</td>
         </tr>`;
+
+        let elemento = {"contador" : contador,
+                        "nombre" : txtNombre.value,
+                        "cantidad" : txtNumero.value,
+                        "precio" : precio};
+                        
+        datos.push(elemento);
+        localStorage.setItem("datos", JSON.stringify(datos));
+
         cuerpoTabla.insertAdjacentHTML("beforeend", row);
         costoTotal += precio * Number(txtNumero.value);
         totalEnProductos += Number(txtNumero.value);
@@ -87,6 +99,37 @@ btnAgregar.addEventListener("click", function(event){
     } // isValid
 
 }); // btnAgregar.addEventListener
+
+btnClear.addEventListener("click", function(event){
+    event.preventDefault();
+    // Limpiar el valor de los campos
+    txtNombre.value="";
+    txtNumero.value="";
+    // Limpiar el localStorage por cada llave
+    // // localStorage.removeItem("contador");
+    // // localStorage.removeItem("totalEnProductos");
+    // // localStorage.removeItem("costoTotal");
+    // Elimina todo el contenido de localStorage
+    localStorage.clear();
+    // Limpiar la tabla
+    cuerpoTabla.innerHTML = "";
+    // Reiniciar las variables, contador, costoTotal, totalEnProductos
+    contador = 0;
+    costoTotal = 0;
+    totalEnProductos = 0;
+    // Asignar las variables a los divs
+    contadorProductos.innerText = contador;
+    productosTotal.innerText = totalEnProductos;
+    precioTotal.innerText = "$" + costoTotal.toFixed(2);
+    // Ocultar las alertas
+    alertValidaciones.style.display = "none";
+    alertValidacionesTexto.innerHTML = "";
+    // Quitar los bordes
+    txtNombre.style.border = "";
+    txtNumero.style.border = "";
+    // Enfocar el primer campo
+    txtNombre.focus();
+})
 
     // Este evento es cuando un campo pierde el foco, se sale del campo
 txtNombre.addEventListener("blur", function(event){
@@ -113,4 +156,17 @@ window.addEventListener("load", function(){
     contadorProductos.innerText = contador;
     productosTotal.innerText = totalEnProductos;
     precioTotal.innerText = "$" + costoTotal.toFixed(2);
-}); // Windows load
+
+    if (this.localStorage.getItem("datos") !=null) {
+        datos = JSON.parse(this.localStorage.getItem("datos"));
+    } // !=null
+    datos.forEach(r => {
+        let row = ` <tr>
+                        <td>${r.contador}</td>
+                        <td>${r.nombre}</td>
+                        <td>${r.cantidad}</td>
+                        <td>${r.precio}</td>
+                    </tr>`;
+        cuerpoTabla.insertAdjacentHTML("beforeend", row);
+    });
+}); // Window load
